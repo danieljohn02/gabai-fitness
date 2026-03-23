@@ -3418,20 +3418,20 @@
 
       /* ── Build inner structure ── */
 
-      /* Shader surface — sized explicitly after layout measurement */
+      /* Shader surface — inset:0 so CSS fills button exactly regardless of timing */
       const sc = document.createElement('div');
       sc.className = 'lmb-sc';
-      sc.style.cssText = 'position:absolute;top:0;left:0;z-index:0;'
+      sc.style.cssText = 'position:absolute;inset:0;z-index:0;'
         + 'border-radius:inherit;overflow:hidden;pointer-events:none;';
 
-      /* Warm gold tint overlay — sits between shader and dark bg, visible in 2px rim */
+      /* Warm gold tint overlay — full coverage, visible in rim */
       const tint = document.createElement('div');
       tint.style.cssText = 'position:absolute;inset:0;z-index:1;border-radius:inherit;'
         + 'background:rgba(201,168,76,.22);pointer-events:none;transition:opacity .2s ease;';
 
-      /* Dark inner glass */
+      /* Dark inner glass — 3px rim exposes shader around full perimeter */
       const dark = document.createElement('div');
-      dark.style.cssText = 'position:absolute;inset:2px;z-index:2;border-radius:inherit;'
+      dark.style.cssText = 'position:absolute;inset:3px;z-index:2;border-radius:inherit;'
         + 'background:linear-gradient(155deg,#1c1c1c 0%,#060606 100%);'
         + 'pointer-events:none;transition:box-shadow .12s ease;';
 
@@ -3456,15 +3456,9 @@
       el.appendChild(dark);
       el.appendChild(lbl);
 
-      /* Measure exact rendered dimensions then init shader */
+      /* Init shader after layout settles — sc fills button via inset:0 */
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        const W = el.offsetWidth;
-        const H = el.offsetHeight;
-        if (!W || !H) return;
-
-        /* Set shader container to exact button size */
-        sc.style.width  = W + 'px';
-        sc.style.height = H + 'px';
+        if (!el.offsetWidth || !el.offsetHeight) return;
 
         let sm;
         try { sm = new ShaderMount(sc, liquidMetalFragmentShader, OPTS, undefined, 0.6); }
