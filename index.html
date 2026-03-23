@@ -2109,19 +2109,11 @@
           <div class="prog-detail-content" id="progDetailContent">
             <!-- Rendered by JS -->
           </div>
-          <div class="prog-nav-row">
-            <button class="prog-nav-btn" id="progPrev" aria-label="Previous package">
-              <i class="fas fa-arrow-left" aria-hidden="true"></i>
-            </button>
-            <div class="prog-dots" id="progDots">
-              <div class="prog-dot active"></div>
-              <div class="prog-dot"></div>
-              <div class="prog-dot"></div>
-              <div class="prog-dot"></div>
-            </div>
-            <button class="prog-nav-btn" id="progNext" aria-label="Next package">
-              <i class="fas fa-arrow-right" aria-hidden="true"></i>
-            </button>
+          <div class="prog-dots" id="progDots" style="display:flex;gap:8px;margin-top:18px;">
+            <div class="prog-dot active"></div>
+            <div class="prog-dot"></div>
+            <div class="prog-dot"></div>
+            <div class="prog-dot"></div>
           </div>
         </div>
 
@@ -3050,9 +3042,15 @@
           (pkg.popular ? '<div class="prog-popular-badge"><i class="fas fa-star" style="font-size:9px"></i> Most Popular</div>' : '') +
           '<p class="prog-counter">Package 0' + (idx + 1) + ' of 04</p>' +
           '<h3 class="prog-name bebas' + goldClass + '">' + pkg.name.replace('\n', '<br>') + '</h3>' +
-          '<div class="prog-price-row">' +
-            '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
-            '<span class="prog-price-mo">/ month</span>' +
+          '<div class="prog-price-nav">' +
+            '<button class="prog-nav-btn" id="progPrev" aria-label="Previous package"><i class="fas fa-arrow-left" aria-hidden="true"></i></button>' +
+            '<div class="prog-price-block">' +
+              '<div class="prog-price-row">' +
+                '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
+                '<span class="prog-price-mo">/ month</span>' +
+              '</div>' +
+            '</div>' +
+            '<button class="prog-nav-btn" id="progNext" aria-label="Next package"><i class="fas fa-arrow-right" aria-hidden="true"></i></button>' +
           '</div>' +
           '<p class="prog-per-session">' + pkg.perSession + '</p>' +
           '<div class="prog-sessions-row">' +
@@ -3073,6 +3071,10 @@
           if (window._lmbUpgrade) {
             content.querySelectorAll('.btn.btn-gold, .btn.btn-outline').forEach(window._lmbUpgrade);
           }
+          var pp = content.querySelector('#progPrev');
+          var pn = content.querySelector('#progNext');
+          if (pp) pp.addEventListener('click', function() { navigate(-1); });
+          if (pn) pn.addEventListener('click', function() { navigate(1); });
           setTimeout(function () { content.classList.remove('entering'); }, 420);
         }, 210);
 
@@ -3091,10 +3093,7 @@
         renderPackage(active);
       }
 
-      const btnPrev = document.getElementById('progPrev');
-      const btnNext = document.getElementById('progNext');
-      if (btnPrev) btnPrev.addEventListener('click', function () { navigate(-1); });
-      if (btnNext) btnNext.addEventListener('click', function () { navigate(1); });
+      /* Arrow buttons are inside the JS template — listeners attached in renderPackage */
 
       renderPackage(0);
     })();
