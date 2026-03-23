@@ -1116,6 +1116,11 @@
       font-size: 15px; color: var(--muted); line-height: 1.78;
       margin-bottom: 28px; min-height: 76px;
     }
+    .prog-price-nav {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
+    }
+    .prog-price-block { flex: 1; min-width: 0; }
+    .prog-price-block .prog-price-row { margin-bottom: 12px; }
     .prog-nav-row {
       display: flex; align-items: center; gap: 14px; margin-top: 24px;
     }
@@ -2097,21 +2102,13 @@
         <!-- Right: animated package details -->
         <div class="prog-detail">
           <div class="prog-detail-content" id="progDetailContent">
-            <!-- Rendered by JS -->
+            <!-- Rendered by JS — includes prev/next buttons and Get Started -->
           </div>
-          <div class="prog-nav-row">
-            <button class="prog-nav-btn" id="progPrev" aria-label="Previous package">
-              <i class="fas fa-arrow-left" aria-hidden="true"></i>
-            </button>
-            <div class="prog-dots" id="progDots">
-              <div class="prog-dot active"></div>
-              <div class="prog-dot"></div>
-              <div class="prog-dot"></div>
-              <div class="prog-dot"></div>
-            </div>
-            <button class="prog-nav-btn" id="progNext" aria-label="Next package">
-              <i class="fas fa-arrow-right" aria-hidden="true"></i>
-            </button>
+          <div class="prog-dots" id="progDots" style="display:flex;gap:8px;margin-top:20px;">
+            <div class="prog-dot active"></div>
+            <div class="prog-dot"></div>
+            <div class="prog-dot"></div>
+            <div class="prog-dot"></div>
           </div>
         </div>
 
@@ -3040,17 +3037,23 @@
           (pkg.popular ? '<div class="prog-popular-badge"><i class="fas fa-star" style="font-size:9px"></i> Most Popular</div>' : '') +
           '<p class="prog-counter">Package 0' + (idx + 1) + ' of 04</p>' +
           '<h3 class="prog-name bebas' + goldClass + '">' + pkg.name.replace('\n', '<br>') + '</h3>' +
-          '<div class="prog-price-row">' +
-            '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
-            '<span class="prog-price-mo">/ month</span>' +
+          '<div class="prog-price-nav">' +
+            '<button class="prog-nav-btn" id="progPrev" aria-label="Previous package"><i class="fas fa-arrow-left" aria-hidden="true"></i></button>' +
+            '<div class="prog-price-block">' +
+              '<div class="prog-price-row">' +
+                '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
+                '<span class="prog-price-mo">/ month</span>' +
+              '</div>' +
+              '<a href="#contact" class="btn ' + pkg.btnClass + '">' +
+                '<i class="fas fa-calendar-check"></i> Get Started' +
+              '</a>' +
+            '</div>' +
+            '<button class="prog-nav-btn" id="progNext" aria-label="Next package"><i class="fas fa-arrow-right" aria-hidden="true"></i></button>' +
           '</div>' +
           '<p class="prog-per-session">' + pkg.perSession + '</p>' +
           '<p class="prog-sessions">' + pkg.sessions + '</p>' +
           '<p class="prog-desc" id="progDesc">' + pkg.desc + '</p>' +
-          '<a href="#contact" class="btn ' + pkg.btnClass + '">' +
-            '<i class="fas fa-calendar-check"></i> Get Started' +
-          '</a>' +
-          '<br><a href="' + pkg.detailPage + '" class="pkg-detail-link">View Full Details <i class="fas fa-arrow-right"></i></a>';
+          '<a href="' + pkg.detailPage + '" class="pkg-detail-link">View Full Details <i class="fas fa-arrow-right"></i></a>';
 
         content.classList.add('exiting');
         setTimeout(function () {
@@ -3061,6 +3064,10 @@
           if (window._lmbUpgrade) {
             content.querySelectorAll('.btn.btn-gold, .btn.btn-outline').forEach(window._lmbUpgrade);
           }
+          var pPrev = content.querySelector('#progPrev');
+          var pNext = content.querySelector('#progNext');
+          if (pPrev) pPrev.addEventListener('click', function() { navigate(-1); });
+          if (pNext) pNext.addEventListener('click', function() { navigate(1); });
           setTimeout(function () { content.classList.remove('entering'); }, 420);
         }, 210);
 
@@ -3079,10 +3086,7 @@
         renderPackage(active);
       }
 
-      const btnPrev = document.getElementById('progPrev');
-      const btnNext = document.getElementById('progNext');
-      if (btnPrev) btnPrev.addEventListener('click', function () { navigate(-1); });
-      if (btnNext) btnNext.addEventListener('click', function () { navigate(1); });
+      /* prev/next listeners are attached dynamically inside renderPackage (buttons live in JS template) */
 
       renderPackage(0);
     })();
