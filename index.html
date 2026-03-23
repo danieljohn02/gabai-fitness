@@ -3400,13 +3400,18 @@
       .btn[data-lmb]:active { transform:none!important; }
     </style>`);
 
-    /* Gold-warm shader uniforms */
+    /* Gold-warm shader uniforms
+       u_shape:0      = full-canvas fill (no circle clip — DOM dark div handles masking)
+       u_scale:1      = show full stripe pattern instead of zooming into one band
+       u_repetition:10 = max bands so every rim point is always near a bright stripe
+       u_softness:0.9 = wide soft shoulders so no rim point ever goes fully dark
+       u_angle:0      = horizontal sweep → both pill caps get equal coverage */
     const OPTS = {
-      u_repetition: 4,  u_softness: 0.5,
-      u_shiftRed:   0.55, u_shiftBlue: 0.06,   /* warm gold tilt */
+      u_repetition: 10, u_softness:   0.9,
+      u_shiftRed:   0.55, u_shiftBlue: 0.06,
       u_distortion: 0,  u_contour:    0,
-      u_angle: 45,      u_scale:      8,
-      u_shape: 1,       u_offsetX:    0.1,  u_offsetY: -0.1,
+      u_angle:      0,  u_scale:      1,
+      u_shape:      0,  u_offsetX:    0,  u_offsetY: 0,
     };
 
     function upgrade(el) {
@@ -3429,14 +3434,11 @@
       tint.style.cssText = 'position:absolute;inset:0;z-index:1;border-radius:inherit;'
         + 'background:rgba(201,168,76,.22);pointer-events:none;transition:opacity .2s ease;';
 
-      /* Dark inner glass — mask fades to transparent at all edges so the shader
-         is ALWAYS visible around the full perimeter (not just when the light sweeps through) */
+      /* Dark inner glass — thin rim reveals shader around perimeter */
       const dark = document.createElement('div');
-      dark.style.cssText = 'position:absolute;inset:0;z-index:2;border-radius:inherit;'
+      dark.style.cssText = 'position:absolute;inset:3px;z-index:2;border-radius:inherit;'
         + 'background:linear-gradient(155deg,#1c1c1c 0%,#060606 100%);'
-        + 'pointer-events:none;transition:box-shadow .12s ease;'
-        + '-webkit-mask:radial-gradient(ellipse 86% 55% at 50% 50%,rgba(0,0,0,1) 55%,rgba(0,0,0,0) 93%);'
-        + 'mask:radial-gradient(ellipse 86% 55% at 50% 50%,rgba(0,0,0,1) 55%,rgba(0,0,0,0) 93%);';
+        + 'pointer-events:none;transition:box-shadow .12s ease;';
 
       /* Label — rendered in flow so el's padding drives its own height */
       const lbl = document.createElement('div');
