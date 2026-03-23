@@ -677,6 +677,7 @@
       cursor: pointer;
       display: flex;
       flex-direction: column;
+      will-change: transform, opacity;
     }
     .tc-card[data-pos="front"] {
       transform: scale(1.03);
@@ -855,16 +856,29 @@
       background: rgba(201,168,76,0.2);
       border-color: rgba(201,168,76,0.5);
     }
+    .trainer-modal-handle {
+      display: none;
+      width: 44px; height: 5px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 3px;
+      margin: 10px auto 0;
+      flex-shrink: 0;
+    }
     @media (max-width: 600px) {
       .trainer-modal-wrap { padding: 0; align-items: flex-end; }
       .trainer-modal {
         max-width: 100%;
         border-radius: 20px 20px 0 0;
-        max-height: 92vh;
+        max-height: 78vh;
         transform: translateY(100%);
       }
       .trainer-modal-wrap.open .trainer-modal { transform: translateY(0); }
-      .trainer-modal-photo { height: 220px; border-radius: 20px 20px 0 0; }
+      .trainer-modal-photo { height: 170px; border-radius: 20px 20px 0 0; }
+      .trainer-modal-handle { display: block; }
+      .trainer-modal-close { width: 48px; height: 48px; font-size: 18px; }
+      .trainer-modal-body { padding: 20px 20px 28px; }
+      .trainer-modal-name { font-size: 22px; }
+      .trainer-modal-esc { display: none; }
     }
     .trainer-modal-esc {
       text-align: center;
@@ -1826,27 +1840,44 @@
       .review-text  { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 0; }
       .rating-summary { flex-wrap: wrap; justify-content: center; gap: 10px; }
 
-      /* Team Shuffle — phones: one card at a time, auto-height via JS */
+      /* Team Shuffle — phone carousel: front card centred + right peek + swipe */
       .team-shuffle-wrap       { gap: 20px; }
-      .team-cards-stage        { position: relative; min-height: 300px; display: block; }
+      .team-cards-stage        {
+        position: relative;
+        overflow: hidden;           /* clips peeking cards at stage edges */
+        display: block;
+        min-height: 380px;
+        touch-action: pan-y;        /* allow vertical page scroll; horizontal handled by JS */
+      }
       .tc-card                 {
         position: absolute;
-        width: 100%; left: 0; top: 0;
+        width: 84%; left: 8%; top: 0;
         flex: none;
-        transition: opacity 0.35s, transform 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s;
+        transition: transform 0.42s cubic-bezier(0.4,0,0.2,1),
+                    opacity 0.42s ease,
+                    filter  0.42s ease;
       }
       .tc-card[data-pos="front"]  {
-        transform: none; opacity: 1; filter: none;
+        transform: translateX(0); opacity: 1; filter: none;
         pointer-events: all; z-index: 4;
+        box-shadow: 0 12px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,168,76,0.2);
+        border-color: rgba(201,168,76,0.5);
       }
-      .tc-card[data-pos="middle"],
-      .tc-card[data-pos="back"],
-      .tc-card[data-pos="hidden"] {
-        transform: translateX(24px);
-        opacity: 0; filter: none;
+      .tc-card[data-pos="middle"] {   /* next card — peeks ~12% from right, tappable */
+        transform: translateX(95%); opacity: 0.65; filter: grayscale(0.3);
+        pointer-events: all; z-index: 3;
+        border-color: var(--border);
+        box-shadow: none;
+      }
+      .tc-card[data-pos="back"]   {   /* off-screen right, invisible */
+        transform: translateX(200%); opacity: 0; filter: none;
+        pointer-events: none; z-index: 2;
+      }
+      .tc-card[data-pos="hidden"] {   /* off-screen left, invisible — used by prev() */
+        transform: translateX(-120%); opacity: 0; filter: none;
         pointer-events: none; z-index: 1;
       }
-      .tc-photo  { height: 160px; }
+      .tc-photo  { height: 200px; }
       .tc-info   { padding: 14px 16px 14px; }
       .tc-name   { font-size: 16px; }
       .tc-role   { font-size: 10px; }
@@ -2393,7 +2424,7 @@
       </div>
 
       <div class="reviews-cta fade-up">
-        <a href="https://www.google.com/maps/search/Gabai+Fitness+Pomona+NY" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+        <a href="https://www.google.com/search?q=Gabai+Fitness+Pomona+NY+reviews" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
           <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -2612,6 +2643,7 @@
   <div class="trainer-modal-wrap" id="trainerModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
     <div class="trainer-modal-scrim" id="trainerScrim"></div>
     <div class="trainer-modal">
+      <div class="trainer-modal-handle" aria-hidden="true"></div>
       <button class="trainer-modal-close" id="trainerModalClose" aria-label="Close">
         <i class="fas fa-times" aria-hidden="true"></i>
       </button>
@@ -3163,12 +3195,20 @@
         });
       });
 
-      // Close on scrim click, close button, or Escape
+      // Close on scrim click, close button, Escape, or swipe-down
       scrim.addEventListener('click', closeModal);
       closeBtn.addEventListener('click', closeModal);
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
       });
+      var modalInner = modal.querySelector('.trainer-modal');
+      var modalTouchY = 0;
+      modalInner.addEventListener('touchstart', function(e) {
+        modalTouchY = e.touches[0].clientY;
+      }, { passive: true });
+      modalInner.addEventListener('touchend', function(e) {
+        if (e.changedTouches[0].clientY - modalTouchY > 60) closeModal();
+      }, { passive: true });
     })();
 
     /* ── DisplayCards auto-cycle ─────────────────────────── */
@@ -3296,9 +3336,9 @@
           if (bsHead >= bsWords.length + BS_TAIL) {
             bsPauseTimer = setTimeout(function() {
               if (!bsActive) return;
-              bsHead = -2; bsLastTime = null;
-              bsRaf = requestAnimationFrame(frame);
-            }, 1400);
+              // Shimmer reaching the end drives the trainer transition
+              stopAuto(); next(); startAuto();
+            }, 900);
             return;
           }
           bsRaf = requestAnimationFrame(frame);
@@ -3347,7 +3387,7 @@
 
       function startAuto() {
         stopAuto();
-        autoTimer = setInterval(next, 8000);
+        autoTimer = setInterval(next, 40000); /* fallback — shimmer drives transitions */
       }
       function stopAuto() { clearInterval(autoTimer); }
 
@@ -3373,6 +3413,21 @@
       // Pause on hover
       stage.addEventListener('mouseenter', stopAuto);
       stage.addEventListener('mouseleave', startAuto);
+
+      // Swipe left/right to navigate on mobile
+      var tcTouchX = 0, tcTouchY = 0;
+      stage.addEventListener('touchstart', function(e) {
+        tcTouchX = e.touches[0].clientX;
+        tcTouchY = e.touches[0].clientY;
+      }, { passive: true });
+      stage.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - tcTouchX;
+        var dy = e.changedTouches[0].clientY - tcTouchY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 36) {
+          if (dx < 0) { next(); stopAuto(); startAuto(); }
+          else        { prev(); stopAuto(); startAuto(); }
+        }
+      }, { passive: true });
 
       // Start shimmer on the initial front card
       startBioShimmer(cards[pos.indexOf(0)].querySelector('.tc-bio'));
