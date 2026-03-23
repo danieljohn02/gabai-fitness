@@ -130,7 +130,7 @@
 
     /* ─── RESET ───────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; font-size: 16px; }
+    html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
     body {
       background: var(--black);
       color: var(--text);
@@ -1558,8 +1558,11 @@
     .reviews-carousel-wrap {
       overflow: hidden;
       position: relative;
-      margin: 0 calc(-1 * max(24px, (100vw - 1200px) / 2));
+      margin: 0 calc(-1 * clamp(0px, (100vw - 1200px) / 2, 9999px));
       margin-bottom: 48px;
+    }
+    @media (max-width: 767px) {
+      .reviews-carousel-wrap { margin-left: -20px; margin-right: -20px; }
     }
     /* Left / right fade masks */
     .reviews-carousel-wrap::before,
@@ -2635,6 +2638,8 @@
     /* ── Always start at top on load/refresh ── */
     if (history.scrollRestoration) history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
+    /* Fire again on load so module scripts / layout shifts don't pull focus down */
+    window.addEventListener('load', function() { window.scrollTo(0, 0); }, { once: true });
 
     /* ── Navbar scroll effect ── */
     const navbar = document.getElementById('navbar');
@@ -3465,7 +3470,13 @@
     }
 
     /* Apply only to primary CTA buttons — preserves layout of everything else */
+    /* Temporarily disable smooth scroll so DOM mutations don't animate the page */
+    document.documentElement.style.scrollBehavior = 'auto';
     document.querySelectorAll('.btn.btn-gold, .btn.btn-outline').forEach(upgrade);
+    requestAnimationFrame(() => {
+      document.documentElement.style.scrollBehavior = '';
+      window.scrollTo(0, 0);
+    });
   </script>
 
 </body>
