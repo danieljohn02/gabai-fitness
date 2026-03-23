@@ -2647,11 +2647,11 @@
 
   <!-- ─── SCRIPTS ───────────────────────────────────────────────── -->
   <script>
-    /* ── Always start at top on load/refresh ── */
+    /* ── Always start at top on load/refresh/back-forward cache ── */
     if (history.scrollRestoration) history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
-    /* Fire again on load so module scripts / layout shifts don't pull focus down */
     window.addEventListener('load', function() { window.scrollTo(0, 0); }, { once: true });
+    window.addEventListener('pageshow', function(e) { window.scrollTo(0, 0); });
 
     /* ── Navbar scroll effect ── */
     const navbar = document.getElementById('navbar');
@@ -2765,7 +2765,7 @@
       function startAnim() {
         if (active) return;
         active   = true;
-        head     = -2;
+        head     = -0.3;
         lastTime = null;
 
         function frame(ts) {
@@ -3026,6 +3026,9 @@
           content.classList.remove('exiting');
           content.classList.add('entering');
           animateWords(document.getElementById('progDesc'));
+          if (window._lmbUpgrade) {
+            content.querySelectorAll('.btn.btn-gold, .btn.btn-outline').forEach(window._lmbUpgrade);
+          }
           setTimeout(function () { content.classList.remove('entering'); }, 420);
         }, 210);
 
@@ -3400,18 +3403,17 @@
       .btn[data-lmb]:active { transform:none!important; }
     </style>`);
 
-    /* Gold-warm shader uniforms
-       u_shape:0   = full-canvas fill (no circle clip — the real root-cause fix)
-       u_scale:1   = show full pattern across button (other root-cause fix)
-       u_repetition:4  + u_softness:0.72 = dramatic single sweep but bands wide
-         enough that the rim never fully goes dark between passes
-       u_angle:45  = diagonal movement for premium metallic feel */
+    /* Gold-warm shader uniforms — original values from liquid-metal-button.tsx
+       u_shape:0   = full-canvas fill (no circle clip — perimeter coverage fix)
+       u_scale:8   = original zoom level; with shape:0 this gives a dramatic sweep
+       u_softness:0.5, u_repetition:4, u_angle:45, u_offsetX:0.1, u_offsetY:-0.1
+       u_shiftRed/Blue tuned for warm gold tone */
     const OPTS = {
-      u_repetition: 4,  u_softness:   0.72,
+      u_repetition: 4,   u_softness:  0.5,
       u_shiftRed:   0.55, u_shiftBlue: 0.06,
-      u_distortion: 0,  u_contour:    0,
-      u_angle:      45, u_scale:      1,
-      u_shape:      0,  u_offsetX:    0,  u_offsetY: 0,
+      u_distortion: 0,   u_contour:   0,
+      u_angle:      45,  u_scale:     8,
+      u_shape:      0,   u_offsetX:   0.1, u_offsetY: -0.1,
     };
 
     function upgrade(el) {
@@ -3513,6 +3515,9 @@
         });
       }));
     }
+
+    /* Expose upgrade for dynamically-rendered buttons (e.g. packages Get Started) */
+    window._lmbUpgrade = upgrade;
 
     /* Apply only to primary CTA buttons — preserves layout of everything else */
     /* Temporarily disable smooth scroll so DOM mutations don't animate the page */
