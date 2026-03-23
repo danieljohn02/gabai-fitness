@@ -3429,11 +3429,14 @@
       tint.style.cssText = 'position:absolute;inset:0;z-index:1;border-radius:inherit;'
         + 'background:rgba(201,168,76,.22);pointer-events:none;transition:opacity .2s ease;';
 
-      /* Dark inner glass — 3px rim exposes shader around full perimeter */
+      /* Dark inner glass — mask fades to transparent at all edges so the shader
+         is ALWAYS visible around the full perimeter (not just when the light sweeps through) */
       const dark = document.createElement('div');
-      dark.style.cssText = 'position:absolute;inset:3px;z-index:2;border-radius:inherit;'
+      dark.style.cssText = 'position:absolute;inset:0;z-index:2;border-radius:inherit;'
         + 'background:linear-gradient(155deg,#1c1c1c 0%,#060606 100%);'
-        + 'pointer-events:none;transition:box-shadow .12s ease;';
+        + 'pointer-events:none;transition:box-shadow .12s ease;'
+        + '-webkit-mask:radial-gradient(ellipse 86% 55% at 50% 50%,rgba(0,0,0,1) 55%,rgba(0,0,0,0) 93%);'
+        + 'mask:radial-gradient(ellipse 86% 55% at 50% 50%,rgba(0,0,0,1) 55%,rgba(0,0,0,0) 93%);';
 
       /* Label — rendered in flow so el's padding drives its own height */
       const lbl = document.createElement('div');
