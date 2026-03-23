@@ -1109,18 +1109,22 @@
     .prog-sessions {
       font-size: 11px; font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.1em; color: var(--muted);
-      margin-bottom: 22px; padding-bottom: 22px;
-      border-bottom: 1px solid var(--border);
+      margin-bottom: 0; padding-bottom: 0; border-bottom: none;
     }
     .prog-desc {
       font-size: 15px; color: var(--muted); line-height: 1.78;
       margin-bottom: 28px; min-height: 76px;
     }
-    .prog-price-nav {
-      display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
+    .prog-sessions-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      margin-bottom: 22px; padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
     }
-    .prog-price-block { flex: 1; min-width: 0; }
-    .prog-price-block .prog-price-row { margin-bottom: 12px; }
+    .prog-sessions-row .prog-sessions {
+      margin-bottom: 0; padding-bottom: 0;
+      border-bottom: none;
+    }
     .prog-nav-row {
       display: flex; align-items: center; gap: 14px; margin-top: 24px;
     }
@@ -1852,6 +1856,7 @@
         overflow: hidden;           /* clips peeking cards at stage edges */
         display: block;
         min-height: 380px;
+        padding-bottom: 4px;        /* prevents border/shadow clipping at bottom */
         touch-action: pan-y;        /* allow vertical page scroll; horizontal handled by JS */
       }
       .tc-card                 {
@@ -2102,13 +2107,21 @@
         <!-- Right: animated package details -->
         <div class="prog-detail">
           <div class="prog-detail-content" id="progDetailContent">
-            <!-- Rendered by JS — includes prev/next buttons and Get Started -->
+            <!-- Rendered by JS -->
           </div>
-          <div class="prog-dots" id="progDots" style="display:flex;gap:8px;margin-top:20px;">
-            <div class="prog-dot active"></div>
-            <div class="prog-dot"></div>
-            <div class="prog-dot"></div>
-            <div class="prog-dot"></div>
+          <div class="prog-nav-row">
+            <button class="prog-nav-btn" id="progPrev" aria-label="Previous package">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            </button>
+            <div class="prog-dots" id="progDots">
+              <div class="prog-dot active"></div>
+              <div class="prog-dot"></div>
+              <div class="prog-dot"></div>
+              <div class="prog-dot"></div>
+            </div>
+            <button class="prog-nav-btn" id="progNext" aria-label="Next package">
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
 
@@ -3037,21 +3050,17 @@
           (pkg.popular ? '<div class="prog-popular-badge"><i class="fas fa-star" style="font-size:9px"></i> Most Popular</div>' : '') +
           '<p class="prog-counter">Package 0' + (idx + 1) + ' of 04</p>' +
           '<h3 class="prog-name bebas' + goldClass + '">' + pkg.name.replace('\n', '<br>') + '</h3>' +
-          '<div class="prog-price-nav">' +
-            '<button class="prog-nav-btn" id="progPrev" aria-label="Previous package"><i class="fas fa-arrow-left" aria-hidden="true"></i></button>' +
-            '<div class="prog-price-block">' +
-              '<div class="prog-price-row">' +
-                '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
-                '<span class="prog-price-mo">/ month</span>' +
-              '</div>' +
-              '<a href="#contact" class="btn ' + pkg.btnClass + '">' +
-                '<i class="fas fa-calendar-check"></i> Get Started' +
-              '</a>' +
-            '</div>' +
-            '<button class="prog-nav-btn" id="progNext" aria-label="Next package"><i class="fas fa-arrow-right" aria-hidden="true"></i></button>' +
+          '<div class="prog-price-row">' +
+            '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
+            '<span class="prog-price-mo">/ month</span>' +
           '</div>' +
           '<p class="prog-per-session">' + pkg.perSession + '</p>' +
-          '<p class="prog-sessions">' + pkg.sessions + '</p>' +
+          '<div class="prog-sessions-row">' +
+            '<p class="prog-sessions">' + pkg.sessions + '</p>' +
+            '<a href="#contact" class="btn ' + pkg.btnClass + '">' +
+              '<i class="fas fa-calendar-check"></i> Get Started' +
+            '</a>' +
+          '</div>' +
           '<p class="prog-desc" id="progDesc">' + pkg.desc + '</p>' +
           '<a href="' + pkg.detailPage + '" class="pkg-detail-link">View Full Details <i class="fas fa-arrow-right"></i></a>';
 
@@ -3064,10 +3073,6 @@
           if (window._lmbUpgrade) {
             content.querySelectorAll('.btn.btn-gold, .btn.btn-outline').forEach(window._lmbUpgrade);
           }
-          var pPrev = content.querySelector('#progPrev');
-          var pNext = content.querySelector('#progNext');
-          if (pPrev) pPrev.addEventListener('click', function() { navigate(-1); });
-          if (pNext) pNext.addEventListener('click', function() { navigate(1); });
           setTimeout(function () { content.classList.remove('entering'); }, 420);
         }, 210);
 
@@ -3086,7 +3091,10 @@
         renderPackage(active);
       }
 
-      /* prev/next listeners are attached dynamically inside renderPackage (buttons live in JS template) */
+      const btnPrev = document.getElementById('progPrev');
+      const btnNext = document.getElementById('progNext');
+      if (btnPrev) btnPrev.addEventListener('click', function () { navigate(-1); });
+      if (btnNext) btnNext.addEventListener('click', function () { navigate(1); });
 
       renderPackage(0);
     })();
@@ -3358,11 +3366,11 @@
         dots.forEach(function(d, i) { d.classList.toggle('active', i === frontCardIdx); });
         frontIdx = frontCardIdx;
         startBioShimmer(cards[frontCardIdx].querySelector('.tc-bio'));
-        // Mobile: size stage to front card height
+        // Mobile: size stage to front card height + 8px to prevent bottom shadow clipping
         if (window.innerWidth <= 480) {
           requestAnimationFrame(function() {
             var h = cards[frontCardIdx].scrollHeight;
-            if (h > 0) stage.style.height = h + 'px';
+            if (h > 0) stage.style.height = (h + 8) + 'px';
           });
         }
       }
@@ -3372,7 +3380,7 @@
           var frontCardIdx = pos.indexOf(0);
           requestAnimationFrame(function() {
             var h = cards[frontCardIdx].scrollHeight;
-            if (h > 0) stage.style.height = h + 'px';
+            if (h > 0) stage.style.height = (h + 8) + 'px'; /* +8 prevents bottom shadow clipping */
           });
         }
       }
