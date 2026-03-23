@@ -1109,21 +1109,17 @@
     .prog-sessions {
       font-size: 11px; font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.1em; color: var(--muted);
-      margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+      margin-bottom: 22px; padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
     }
     .prog-desc {
       font-size: 15px; color: var(--muted); line-height: 1.78;
       margin-bottom: 28px; min-height: 76px;
     }
-    .prog-sessions-row {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; flex-wrap: wrap;
-      margin-bottom: 22px; padding-bottom: 22px;
-      border-bottom: 1px solid var(--border);
-    }
-    .prog-sessions-row .prog-sessions {
-      margin-bottom: 0; padding-bottom: 0;
-      border-bottom: none;
+    .prog-price-cta-row {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 16px;
+      flex-wrap: wrap; margin-bottom: 4px;
     }
     .prog-nav-row {
       display: flex; align-items: center; gap: 14px; margin-top: 24px;
@@ -2109,11 +2105,19 @@
           <div class="prog-detail-content" id="progDetailContent">
             <!-- Rendered by JS -->
           </div>
-          <div class="prog-dots" id="progDots" style="display:flex;gap:8px;margin-top:18px;">
-            <div class="prog-dot active"></div>
-            <div class="prog-dot"></div>
-            <div class="prog-dot"></div>
-            <div class="prog-dot"></div>
+          <div class="prog-nav-row">
+            <button class="prog-nav-btn" id="progPrev" aria-label="Previous package">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            </button>
+            <div class="prog-dots" id="progDots">
+              <div class="prog-dot active"></div>
+              <div class="prog-dot"></div>
+              <div class="prog-dot"></div>
+              <div class="prog-dot"></div>
+            </div>
+            <button class="prog-nav-btn" id="progNext" aria-label="Next package">
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
 
@@ -3042,23 +3046,17 @@
           (pkg.popular ? '<div class="prog-popular-badge"><i class="fas fa-star" style="font-size:9px"></i> Most Popular</div>' : '') +
           '<p class="prog-counter">Package 0' + (idx + 1) + ' of 04</p>' +
           '<h3 class="prog-name bebas' + goldClass + '">' + pkg.name.replace('\n', '<br>') + '</h3>' +
-          '<div class="prog-price-nav">' +
-            '<button class="prog-nav-btn" id="progPrev" aria-label="Previous package"><i class="fas fa-arrow-left" aria-hidden="true"></i></button>' +
-            '<div class="prog-price-block">' +
-              '<div class="prog-price-row">' +
-                '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
-                '<span class="prog-price-mo">/ month</span>' +
-              '</div>' +
+          '<div class="prog-price-cta-row">' +
+            '<div class="prog-price-row">' +
+              '<span class="prog-price bebas' + goldClass + '"><sup>$</sup>' + pkg.price + '</span>' +
+              '<span class="prog-price-mo">/ month</span>' +
             '</div>' +
-            '<button class="prog-nav-btn" id="progNext" aria-label="Next package"><i class="fas fa-arrow-right" aria-hidden="true"></i></button>' +
-          '</div>' +
-          '<p class="prog-per-session">' + pkg.perSession + '</p>' +
-          '<div class="prog-sessions-row">' +
-            '<p class="prog-sessions">' + pkg.sessions + '</p>' +
             '<a href="#contact" class="btn ' + pkg.btnClass + '">' +
               '<i class="fas fa-calendar-check"></i> Get Started' +
             '</a>' +
           '</div>' +
+          '<p class="prog-per-session">' + pkg.perSession + '</p>' +
+          '<p class="prog-sessions">' + pkg.sessions + '</p>' +
           '<p class="prog-desc" id="progDesc">' + pkg.desc + '</p>' +
           '<a href="' + pkg.detailPage + '" class="pkg-detail-link">View Full Details <i class="fas fa-arrow-right"></i></a>';
 
@@ -3071,10 +3069,6 @@
           if (window._lmbUpgrade) {
             content.querySelectorAll('.btn.btn-gold, .btn.btn-outline').forEach(window._lmbUpgrade);
           }
-          var pp = content.querySelector('#progPrev');
-          var pn = content.querySelector('#progNext');
-          if (pp) pp.addEventListener('click', function() { navigate(-1); });
-          if (pn) pn.addEventListener('click', function() { navigate(1); });
           setTimeout(function () { content.classList.remove('entering'); }, 420);
         }, 210);
 
@@ -3093,7 +3087,10 @@
         renderPackage(active);
       }
 
-      /* Arrow buttons are inside the JS template — listeners attached in renderPackage */
+      const btnPrev = document.getElementById('progPrev');
+      const btnNext = document.getElementById('progNext');
+      if (btnPrev) btnPrev.addEventListener('click', function () { navigate(-1); });
+      if (btnNext) btnNext.addEventListener('click', function () { navigate(1); });
 
       renderPackage(0);
     })();
