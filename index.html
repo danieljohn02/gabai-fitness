@@ -3401,16 +3401,16 @@
     </style>`);
 
     /* Gold-warm shader uniforms
-       u_shape:0      = full-canvas fill (no circle clip — DOM dark div handles masking)
-       u_scale:1      = show full stripe pattern instead of zooming into one band
-       u_repetition:10 = max bands so every rim point is always near a bright stripe
-       u_softness:0.9 = wide soft shoulders so no rim point ever goes fully dark
-       u_angle:0      = horizontal sweep → both pill caps get equal coverage */
+       u_shape:0   = full-canvas fill (no circle clip — the real root-cause fix)
+       u_scale:1   = show full pattern across button (other root-cause fix)
+       u_repetition:4  + u_softness:0.72 = dramatic single sweep but bands wide
+         enough that the rim never fully goes dark between passes
+       u_angle:45  = diagonal movement for premium metallic feel */
     const OPTS = {
-      u_repetition: 10, u_softness:   0.9,
+      u_repetition: 4,  u_softness:   0.72,
       u_shiftRed:   0.55, u_shiftBlue: 0.06,
       u_distortion: 0,  u_contour:    0,
-      u_angle:      0,  u_scale:      1,
+      u_angle:      45, u_scale:      1,
       u_shape:      0,  u_offsetX:    0,  u_offsetY: 0,
     };
 
@@ -3466,7 +3466,7 @@
         if (!el.offsetWidth || !el.offsetHeight) return;
 
         let sm;
-        try { sm = new ShaderMount(sc, liquidMetalFragmentShader, OPTS, undefined, 0.6); }
+        try { sm = new ShaderMount(sc, liquidMetalFragmentShader, OPTS, undefined, 0.75); }
         catch(e) { return; }
 
         /* Interaction — speed + gold glow shadow */
